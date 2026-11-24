@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan BTAQ Kelas 6 - Game Edukasi Tajwid & Al-Qur'an</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka (ceria/ramah anak), Amiri (font Arab yang indah), Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tone.js untuk efek suara sintetis tanpa URL eksternal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Canvas Confetti untuk perayaan kemenangan -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ecfdf5;
+            background-image: radial-gradient(#a7f3d0 1.5px, transparent 1.5px), radial-gradient(#a7f3d0 1.5px, #ecfdf5 1.5px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            overflow-x: hidden;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .font-arab {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+            line-height: 2;
+        }
+
+        /* Animasi melayang untuk dekorasi */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+        /* Animasi bergetar saat jawaban salah */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Animasi pop saat muncul */
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-pop {
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Custom Game Button 3D Effect */
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 5px 0 #065f46;
+        }
+        .btn-emerald:active:not(:disabled) {
+            box-shadow: 0 1px 0 #065f46;
+        }
+
+        .btn-amber {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 5px 0 #92400e;
+        }
+        .btn-amber:active:not(:disabled) {
+            box-shadow: 0 1px 0 #92400e;
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 5px 0 #1e40af;
+        }
+        .btn-blue:active:not(:disabled) {
+            box-shadow: 0 1px 0 #1e40af;
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            box-shadow: 0 5px 0 #5b21b6;
+        }
+        .btn-purple:active:not(:disabled) {
+            box-shadow: 0 1px 0 #5b21b6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #d1fae5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 select-none">
+
+    <!-- Top Navigation / Status Bar -->
+    <header class="w-full bg-white/90 backdrop-blur-md border-b-4 border-emerald-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+            <!-- Logo & Judul -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="confirmReturnHome()">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md">
+                    <!-- Ikon Bulan Sabit & Bintang SVG -->
+                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+                        <path d="M19 3l.9 1.9L22 5.8l-1.9.9L19 8.6l-.9-1.9L16 5.8l1.9-.9L19 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-game text-lg sm:text-xl font-bold text-emerald-800 leading-tight">Petualangan BTAQ</h1>
+                    <p class="text-xs font-semibold text-emerald-600">Kelas 6 • Tajwid & QS. Al-Mursalat</p>
+                </div>
+            </div>
+
+            <!-- HUD Stats (Muncul saat bermain) -->
+            <div id="game-hud" class="hidden flex items-center gap-2 sm:gap-4">
+                <!-- Nyawa / Hati -->
+                <div class="flex items-center gap-1 bg-rose-50 border-2 border-rose-200 px-3 py-1.5 rounded-2xl shadow-inner" title="Nyawa Tersisa">
+                    <span id="hearts-display" class="text-base sm:text-lg tracking-widest">❤️❤️❤️❤️❤️</span>
+                </div>
+
+                <!-- Combo Streak -->
+                <div id="combo-badge" class="hidden sm:flex items-center gap-1 bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl text-amber-800 font-game font-bold text-sm">
+                    <span>🔥</span> <span id="combo-count">0</span>x
+                </div>
+
+                <!-- Skor -->
+                <div class="flex items-center gap-1.5 bg-emerald-50 border-2 border-emerald-200 px-3.5 py-1.5 rounded-2xl shadow-inner">
+                    <span class="text-amber-500 text-lg">⭐</span>
+                    <span id="score-display" class="font-game font-bold text-emerald-800 text-base sm:text-lg">0</span>
+                </div>
+            </div>
+
+            <!-- Kontrol Suara & Home -->
+            <div class="flex items-center gap-2">
+                <button id="sound-toggle" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-700 transition border-2 border-slate-200" title="Suara Efek">
+                    <span id="sound-icon" class="text-lg">🔊</span>
+                </button>
+                <button id="home-btn" onclick="confirmReturnHome()" class="hidden p-2.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 transition border-2 border-slate-200 font-bold text-sm" title="Kembali ke Menu">
+                    🏠 Menu
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+        <div class="w-full max-w-4xl">
+
+            <!-- ================= SCREEN 1: HOME / WELCOME ================= -->
+            <section id="screen-home" class="animate-pop bg-white rounded-3xl border-4 border-emerald-200 shadow-xl p-6 sm:p-10 text-center relative overflow-hidden">
+                <!-- Dekorasi sudut -->
+                <div class="absolute -top-6 -left-6 w-24 h-24 bg-amber-100 rounded-full opacity-60 pointer-events-none"></div>
+                <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-emerald-100 rounded-full opacity-60 pointer-events-none"></div>
+
+                <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-800 font-bold px-4 py-1.5 rounded-full text-xs sm:text-sm mb-4 border border-amber-300">
+                    <span>📖</span> Latihan Interaktif ASAS BTAQ Kelas 6
+                </div>
+
+                <!-- Maskot / Ikon Utama -->
+                <div class="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-4 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-3xl flex items-center justify-center shadow-lg animate-float border-4 border-white">
+                    <span class="text-5xl sm:text-6xl">🕌</span>
+                </div>
+
+                <h2 class="font-game text-2xl sm:text-4xl font-bold text-slate-800 mb-3">
+                    Siap Menjadi Juara <span class="text-emerald-600">BTAQ?</span>
+                </h2>
+                <p class="text-slate-600 max-w-xl mx-auto text-sm sm:text-base mb-6 leading-relaxed">
+                    Uji pemahamanmu tentang <strong>Sukun Ashli & 'Aridh</strong>, <strong>Hukum Mad Lazim</strong>, <strong>Huruf Muqaththa'ah</strong>, serta <strong>Surah Al-Mursalat</strong> melalui 3 tahap petualangan seru!
+                </p>
+
+                <!-- Input Nama Siswa -->
+                <div class="max-w-md mx-auto mb-8">
+                    <label for="player-name" class="block text-left text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">Nama Santri / Siswa:</label>
+                    <input type="text" id="player-name" placeholder="Ketik namamu di sini..." maxlength="25"
+                        class="w-full px-4 py-3.5 rounded-2xl border-3 border-emerald-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none font-semibold text-slate-800 text-center text-base sm:text-lg bg-emerald-50/40 transition">
+                </div>
+
+                <!-- Pilihan Mode Bermain (Satu Opsi Keseluruhan Soal) -->
+                <div class="max-w-md mx-auto">
+                    <button onclick="startGame()" class="w-full btn-3d btn-emerald text-white p-5 sm:p-6 rounded-3xl flex flex-col items-center justify-center text-center group">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="text-3xl">🏆</span>
+                            <span class="text-xs font-bold bg-white/25 px-3 py-1 rounded-full">30 Soal Lengkap • Nilai Maksimal 100</span>
+                        </div>
+                        <h3 class="font-game font-bold text-xl sm:text-2xl leading-snug">Mulai Petualangan BTAQ</h3>
+                        <p class="text-xs sm:text-sm text-emerald-100 mt-1">Kerjakan seluruh soal Pilihan Ganda, Isian Singkat, dan Uraian!</p>
+                        <div class="mt-4 bg-white text-emerald-700 px-5 py-2 rounded-xl text-xs sm:text-sm font-game font-bold uppercase tracking-wider flex items-center gap-1.5 group-hover:scale-105 transition shadow-sm">
+                            Mulai Misi Sekarang <span>➔</span>
+                        </div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ================= SCREEN 2: GAMEPLAY ================= -->
+            <section id="screen-game" class="hidden animate-pop">
+                <!-- Progress Bar & Stage Header -->
+                <div class="bg-white rounded-2xl border-2 border-emerald-200 p-4 mb-4 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span id="stage-badge" class="bg-emerald-100 text-emerald-800 font-game font-bold text-xs sm:text-sm px-3 py-1 rounded-xl">
+                            Babak 1: Pilihan Ganda
+                        </span>
+                        <span id="question-counter" class="text-xs sm:text-sm font-bold text-slate-500">
+                            Soal 1 dari 30
+                        </span>
+                    </div>
+                    <!-- Progress Bar -->
+                    <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-500" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <!-- Kartu Soal Utama -->
+                <div id="question-card" class="bg-white rounded-3xl border-4 border-emerald-200 shadow-xl p-5 sm:p-8 relative">
+                    <!-- Kategori Topik -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span id="topic-tag" class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-3 py-1 rounded-lg border border-teal-200">
+                            📚 Hukum Sukun
+                        </span>
+                        <button onclick="showHint()" id="hint-btn" class="text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition flex items-center gap-1">
+                            💡 Bantuan Ustadz
+                        </button>
+                    </div>
+
+                    <!-- Kotak Petunjuk (Hidden by default) -->
+                    <div id="hint-box" class="hidden mb-4 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-2.5">
+                        <span class="text-lg">👳‍♂️</span>
+                        <div>
+                            <p class="font-bold text-amber-800">Petunjuk Ustadz:</p>
+                            <p id="hint-text">Isi petunjuk di sini.</p>
+                        </div>
+                    </div>
+
+                    <!-- Teks Pertanyaan -->
+                    <div id="question-content" class="mb-6">
+                        <!-- Diisi dinamis oleh JS -->
+                    </div>
+
+                    <!-- Area Interaksi Jawaban (Berubah sesuai tipe soal) -->
+                    <div id="answer-area">
+                        <!-- Diisi dinamis oleh JS -->
+                    </div>
+
+                    <!-- Feedback Banner Setelah Menjawab -->
+                    <div id="feedback-area" class="hidden mt-6 p-4 sm:p-5 rounded-2xl border-2 transition-all">
+                        <div class="flex items-start gap-3">
+                            <div id="feedback-icon" class="text-3xl">🎉</div>
+                            <div class="flex-grow">
+                                <h4 id="feedback-title" class="font-game font-bold text-lg">Masya Allah, Benar!</h4>
+                                <p id="feedback-explanation" class="text-sm mt-1 leading-relaxed"></p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button onclick="nextQuestion()" id="next-btn" class="btn-3d btn-emerald text-white font-game font-bold px-6 py-3 rounded-2xl text-base flex items-center gap-2">
+                                Lanjut Soal Berikutnya <span>➔</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= SCREEN 3: RESULT / CERTIFICATE ================= -->
+            <section id="screen-result" class="hidden animate-pop bg-white rounded-3xl border-4 border-amber-300 shadow-2xl p-6 sm:p-10 text-center relative overflow-hidden">
+                <div class="inline-block bg-amber-100 text-amber-800 font-bold px-4 py-1.5 rounded-full text-xs sm:text-sm mb-3 border border-amber-300">
+                    🏅 Laporan Hasil Belajar BTAQ
+                </div>
+
+                <div id="result-trophy" class="text-6xl sm:text-7xl my-3 animate-float">🏆</div>
+
+                <h2 id="result-heading" class="font-game text-2xl sm:text-4xl font-bold text-slate-800 mb-2">
+                    Alhamdulillah, Luar Biasa!
+                </h2>
+                <p id="result-subtext" class="text-slate-600 text-sm sm:text-base mb-6">
+                    Kamu telah menyelesaikan misi belajar BTAQ Kelas 6 dengan sangat baik.
+                </p>
+
+                <!-- Kartu Statistik Hasil -->
+                <div class="max-w-lg mx-auto bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl border-2 border-emerald-200 p-5 sm:p-6 mb-6 shadow-inner">
+                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">Nama Santri</p>
+                    <h3 id="result-player-name" class="font-game text-xl sm:text-2xl font-bold text-slate-800 mb-4">Santri Hebat</h3>
+
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4 border-t border-emerald-200/80 pt-4">
+                        <div class="bg-white p-3 rounded-2xl shadow-sm">
+                            <p class="text-xs text-slate-500 font-semibold">Total Skor</p>
+                            <p id="result-score" class="font-game text-xl sm:text-2xl font-bold text-amber-600">0</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl shadow-sm">
+                            <p class="text-xs text-slate-500 font-semibold">Jawaban Benar</p>
+                            <p id="result-correct" class="font-game text-xl sm:text-2xl font-bold text-emerald-600">0/30</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl shadow-sm">
+                            <p class="text-xs text-slate-500 font-semibold">Predikat</p>
+                            <p id="result-grade" class="font-game text-lg sm:text-xl font-bold text-purple-600">Mumtaz</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ringkasan Pembahasan Singkat (Review Soal Salah jika ada) -->
+                <div id="review-section" class="hidden max-w-2xl mx-auto text-left mb-6">
+                    <h4 class="font-game font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span>📝</span> Catatan Evaluasi Belajar:
+                    </h4>
+                    <div id="review-list" class="max-h-56 overflow-y-auto space-y-2 pr-1">
+                        <!-- Diisi otomatis jika ada soal yang salah -->
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button onclick="startGame()" class="btn-3d btn-emerald text-white font-game font-bold px-6 py-3.5 rounded-2xl text-base">
+                        🔄 Mainkan Lagi
+                    </button>
+                    <button onclick="goHome()" class="btn-3d btn-blue text-white font-game font-bold px-6 py-3.5 rounded-2xl text-base">
+                        🏠 Halaman Awal
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Custom Modal Konfirmasi (Pengganti confirm() / alert()) -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-emerald-200 max-w-sm w-full p-6 text-center shadow-2xl animate-pop">
+            <div id="modal-icon" class="text-5xl mb-3">🤔</div>
+            <h3 id="modal-title" class="font-game text-xl font-bold text-slate-800 mb-2">Kembali ke Menu Utama?</h3>
+            <p id="modal-desc" class="text-sm text-slate-600 mb-6">Progres permainanmu saat ini akan diulang dari awal.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal()" class="flex-1 py-3 rounded-2xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                    Batal
+                </button>
+                <button id="modal-confirm-btn" onclick="goHome()" class="flex-1 btn-3d btn-amber text-white py-3 rounded-2xl font-game font-bold">
+                    Ya, Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-emerald-800/70 font-medium">
+        Media Pembelajaran Interaktif BTAQ Kelas 6 • Dibuat untuk Generasi Qur'ani 🌟
+    </footer>
+
+    <script>
+        // =========================================================================
+        // 1. DATABASE 30 SOAL ASAS BTAQ KELAS 6 (LENGKAP & TERSTRUKTUR)
+        // =========================================================================
+        const allQuestions = [
+            // --- BAGIAN I: PILIHAN GANDA (Soal 1 - 15) ---
+            {
+                id: 1,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Hukum Sukun',
+                question: 'Sukun yang sudah ada sejak asal pembentukan kata dan tetap dibaca mati, baik saat dibaca waqaf maupun washal disebut ....',
+                options: [
+                    { key: 'A', text: "Sukun 'Aridh" },
+                    { key: 'B', text: 'Sukun Ashli' },
+                    { key: 'C', text: 'Sukun Lazim' },
+                    { key: 'D', text: 'Sukun Tambahan' }
+                ],
+                correct: 'B',
+                hint: 'Kata "Ashli" berarti asli atau bawaan sejak asal kata tersebut terbentuk.',
+                explanation: 'Sukun Ashli adalah sukun asli yang memang sudah menjadi bagian dari struktur kata sejak awal, sehingga selalu dibaca sukun baik saat berhenti (waqaf) maupun disambung (washal).'
+            },
+            {
+                id: 2,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Hukum Sukun',
+                question: "Potongan ayat manakah di bawah ini yang mengandung sukun 'aridh apabila dibaca waqaf di akhir ayat?",
+                options: [
+                    { key: 'A', text: 'الْحَمْدُ لِلَّهِ', isArabic: true },
+                    { key: 'B', text: 'أَنْعَمْتَ عَلَيْهِمْ', isArabic: true },
+                    { key: 'C', text: 'إِيَّاكَ نَعْبُدُ', isArabic: true },
+                    { key: 'D', text: 'وَإِيَّاكَ نَسْتَعِينُ', isArabic: true }
+                ],
+                correct: 'D',
+                hint: 'Carilah akhir ayat yang berharakat hidup (dhammah) sebelum diwaqafkan (نَسْتَعِينُ).',
+                explanation: 'Pada lafal وَإِيَّاكَ نَسْتَعِينُ, huruf Nun (نُ) aslinya berharakat dhammah, namun menjadi sukun sementara (Sukun \'Aridh) ketika kita berhenti (waqaf) di akhir ayat.'
+            },
+            {
+                id: 3,
+                stage: 1,
+                type: 'mcq',
+                topic: "Huruf Muqaththa'ah",
+                question: "Huruf-huruf Muqaththa'ah adalah huruf-huruf hijaiyah terputus yang terletak di ....",
+                options: [
+                    { key: 'A', text: 'Akhir semua surah' },
+                    { key: 'B', text: 'Tengah-tengah ayat' },
+                    { key: 'C', text: 'Awal beberapa surah' },
+                    { key: 'D', text: 'Pertengahan juz' }
+                ],
+                correct: 'C',
+                hint: 'Disebut juga Fawatihus Suwar (pembuka surah), contohnya Alif Laam Miim di awal Surah Al-Baqarah.',
+                explanation: "Huruf Muqaththa'ah adalah huruf-huruf hijaiyah yang terputus secara penulisan dan terletak di awal beberapa surah dalam Al-Qur'an (terdapat pada 29 surah)."
+            },
+            {
+                id: 4,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim',
+                question: "Hukum bacaan Mad Lazim Mutsaqqal Kalimi terjadi apabila ada Mad Thobi'i bertemu dengan huruf bertasydid dalam ....",
+                options: [
+                    { key: 'A', text: 'Satu kata (kalimat)' },
+                    { key: 'B', text: 'Dua kata terpisah' },
+                    { key: 'C', text: 'Huruf pembuka surah' },
+                    { key: 'D', text: 'Akhir bacaan waqaf' }
+                ],
+                correct: 'A',
+                hint: 'Perhatikan istilah "Kalimi" yang artinya kata.',
+                explanation: "Mad Lazim Mutsaqqal Kalimi terjadi apabila Mad Thobi'i bertemu huruf bertasydid dalam satu kata (kalimat), seperti pada kata الضَّالِّينَ."
+            },
+            {
+                id: 5,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim',
+                question: 'Panjang bacaan keempat pembagian hukum Mad Lazim (Mutsaqqal Kalimi, Mukhaffaf Kalimi, Mutsaqqal Harfi, dan Mukhaffaf Harfi) adalah ....',
+                options: [
+                    { key: 'A', text: '2 harakat' },
+                    { key: 'B', text: '4 harakat' },
+                    { key: 'C', text: '5 harakat' },
+                    { key: 'D', text: '6 harakat' }
+                ],
+                correct: 'D',
+                hint: 'Mad Lazim adalah bacaan mad yang paling panjang (3 alif).',
+                explanation: 'Semua jenis hukum Mad Lazim wajib dibaca panjang 6 harakat (atau setara dengan 3 alif).'
+            },
+            {
+                id: 6,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim',
+                question: 'Contoh lafal di bawah ini yang mengandung bacaan Mad Lazim Mutsaqqal Kalimi adalah ....',
+                options: [
+                    { key: 'A', text: 'آلْآنَ', isArabic: true },
+                    { key: 'B', text: 'وَلَا الضَّالِّينَ', isArabic: true },
+                    { key: 'C', text: 'يس', isArabic: true },
+                    { key: 'D', text: 'طه', isArabic: true }
+                ],
+                correct: 'B',
+                hint: 'Cari kata yang memiliki Mad Thobi\'i bertemu tanda tasydid ( ّ ) di dalamnya.',
+                explanation: 'Lafal وَلَا الضَّالِّينَ mengandung Mad Thobi\'i (alif setelah Dhad) yang bertemu huruf Lam bertasydid dalam satu kata, sehingga dibaca 6 harakat dan diberatkan.'
+            },
+            {
+                id: 7,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim',
+                question: "Satu-satunya contoh bacaan Mad Lazim Mukhaffaf Kalimi di dalam Al-Qur'an terdapat pada lafal ....",
+                options: [
+                    { key: 'A', text: 'آلْآنَ (QS. Yunus: 51 & 91)' },
+                    { key: 'B', text: "الصَّاخَّةُ (QS. 'Abasa: 33)" },
+                    { key: 'C', text: "الطَّامَّةُ (QS. An-Nazi'at: 34)" },
+                    { key: 'D', text: 'الْحَاقَّةُ (QS. Al-Haqqah: 1)' }
+                ],
+                correct: 'A',
+                hint: 'Lafal ini terdapat di Surah Yunus ayat 51 dan 91, bertemu huruf sukun tanpa tasydid.',
+                explanation: "Lafal آلْآنَ (Aal-aana) dalam Surah Yunus ayat 51 dan 91 adalah satu-satunya contoh Mad Lazim Mukhaffaf Kalimi dalam Al-Qur'an."
+            },
+            {
+                id: 8,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim',
+                question: 'Secara bahasa, kata "Mutsaqqal" dalam hukum Mad Lazim artinya ....',
+                options: [
+                    { key: 'A', text: 'Diringankan' },
+                    { key: 'B', text: 'Diberatkan' },
+                    { key: 'C', text: 'Dipendekkan' },
+                    { key: 'D', text: 'Disamarkan' }
+                ],
+                correct: 'B',
+                hint: 'Lawannya adalah Mukhaffaf (diringankan). Karena ada tasydid/idgham, bacaannya menjadi berat.',
+                explanation: 'Mutsaqqal (مُثَقَّل) secara bahasa artinya diberatkan, karena adanya tasydid atau peleburan (idgham) huruf.'
+            },
+            {
+                id: 9,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim Harfi',
+                arabicDisplay: 'الم',
+                question: 'Perhatikan huruf Muqaththa\'ah pada awal Surah Al-Baqarah di atas. Hukum bacaan pada huruf ل (Laam) yang di-idgham-kan ke huruf م (Miim) disebut ....',
+                options: [
+                    { key: 'A', text: 'Mad Lazim Mukhaffaf Harfi' },
+                    { key: 'B', text: 'Mad Lazim Mutsaqqal Harfi' },
+                    { key: 'C', text: 'Mad Lazim Mukhaffaf Kalimi' },
+                    { key: 'D', text: 'Mad Lazim Mutsaqqal Kalimi' }
+                ],
+                correct: 'B',
+                hint: 'Terjadi pada huruf (Harfi) dan dileburkan/ditasydidkan (Mutsaqqal).',
+                explanation: 'Huruf Lam (لَامْ) bertemu Mim (مِيمْ) dileburkan (idgham) sehingga menjadi berat (Mutsaqqal) dan terjadi pada huruf pembuka surah (Harfi).'
+            },
+            {
+                id: 10,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim Harfi',
+                question: 'Huruf Muqaththa\'ah berikut ini yang termasuk bacaan Mad Lazim Mukhaffaf Harfi (dibaca 6 harakat tanpa di-idgham-kan) adalah ....',
+                options: [
+                    { key: 'A', text: 'ق dan ن', isArabic: true },
+                    { key: 'B', text: 'ط dan هـ', isArabic: true },
+                    { key: 'C', text: 'ي dan ر', isArabic: true },
+                    { key: 'D', text: 'ح dan ا', isArabic: true }
+                ],
+                correct: 'A',
+                hint: 'Ingat kelompok huruf نَقَصَ عَسَلُكُمْ yang dibaca 6 harakat. Sedangkan حَيٌّ طَهُرَ dibaca 2 harakat.',
+                explanation: 'Huruf ق (Qaaf) dan ن (Nuun) termasuk bagian dari huruf نَقَصَ عَسَلُكُمْ yang dibaca panjang 6 harakat tanpa dileburkan.'
+            },
+            {
+                id: 11,
+                stage: 1,
+                type: 'mcq',
+                topic: 'Mad Lazim Harfi',
+                arabicDisplay: 'كهيعص',
+                question: 'Berapa harakat panjang bacaan untuk huruf Kaf ( ك ) dan Shad ( ص ) pada Huruf Muqaththa\'ah di atas?',
+                options: [
+                    { key: 'A', text: '2 harakat' },
+                    { key: 'B', text: '4 harakat' },
+                    { key: 'C', text: '6 harakat' },
+                    { key: 'D', text: '1 harakat' }
+                ],
+                correct: 'C',
+                hint: 'Kaf dan Shad termasuk huruf Mad Lazim Harfi (نَقَصَ عَسَلُكُمْ).',
+                explanation: 'Huruf Kaf (ك) dan Shad (ص) dibaca panjang 6 harakat (Kaaf - Haa - Yaa - \'Aiin - Shaad).'
+            },
+            {
+                id: 12,
+                stage: 1,
+                type: 'mcq',
+                topic: 'QS. Al-Mursalat',
+                question: 'Surah Al-Mursalat merupakan surah ke-77 dalam Al-Qur\'an. Arti kata "Al-Mursalat" adalah ....',
+                options: [
+                    { key: 'A', text: 'Malaikat-malaikat yang diutus' },
+                    { key: 'B', text: 'Angin yang bertiup kencang' },
+                    { key: 'C', text: 'Bintang yang bersinar' },
+                    { key: 'D', text: 'Hari pembalasan' }
+                ],
+                correct: 'A',
+                hint: 'Berasal dari kata "Arsala" yang artinya mengutus.',
+                explanation: 'Al-Mursalat (الْمُرْسَلَات) artinya "Malaikat-malaikat yang diutus" oleh Allah SWT untuk membawa kebaikan dan wahyu.'
+            },
+            {
+                id: 13,
+                stage: 1,
+                type: 'mcq',
+                topic: 'QS. Al-Mursalat',
+                question: 'Ayat yang diulang-ulang sebanyak 10 kali dalam Surah Al-Mursalat sebagai bentuk peringatan dan ancaman adalah ....',
+                options: [
+                    { key: 'A', text: "Innamaa tuu'aduuna lawaaqi'" },
+                    { key: 'B', text: "Alam nakhluqkum mim maa'im mahiin" },
+                    { key: 'C', text: 'Fa idzan-nujuumu thumisat' },
+                    { key: 'D', text: "Wailuy yauma'idzil lil-mukadzdzibiin" }
+                ],
+                correct: 'D',
+                hint: 'Artinya: "Celakalah pada hari itu bagi orang-orang yang mendustakan (kebenaran)."',
+                explanation: 'Ayat "Wailuy yauma\'idzil lil-mukadzdzibiin" (وَيْلٌ يَوْمَئِذٍ لِلْمُكَذِّبِينَ) diulang sebanyak 10 kali dalam Surah Al-Mursalat.'
+            },
+            {
+                id: 14,
+                stage: 1,
+                type: 'mcq',
+                topic: 'QS. Al-Mursalat',
+                question: 'Lanjutkan potongan ayat dari QS. Al-Mursalat berikut: "Wal-mursalaati \'urfaa, fal-\'aashifaati ...."',
+                options: [
+                    { key: 'A', text: 'Farqaa' },
+                    { key: 'B', text: "'Ashfaa" },
+                    { key: 'C', text: 'Dzikraa' },
+                    { key: 'D', text: 'Nashraa' }
+                ],
+                correct: 'B',
+                hint: 'Perhatikan kemiripan bunyi kata "fal-\'aashifaati" dengan kata setelahnya.',
+                explanation: 'Ayat ke-2 Surah Al-Mursalat berbunyi: "Fal-\'aashifaati \'ashfaa" (فَالْعَاصِفَاتِ عَصْفًا).'
+            },
+            {
+                id: 15,
+                stage: 1,
+                type: 'mcq',
+                topic: 'QS. Al-Mursalat',
+                question: 'Pada QS. Al-Mursalat ayat 20: "Alam nakhluqkum mim maa\'im ....", kata yang tepat untuk melengkapi ayat tersebut adalah ....',
+                options: [
+                    { key: 'A', text: 'Mahiin' },
+                    { key: 'B', text: 'Makiin' },
+                    { key: 'C', text: "Ma'luum" },
+                    { key: 'D', text: 'Mubiin' }
+                ],
+                correct: 'A',
+                hint: 'Artinya: "Bukankah Kami menciptakan kamu dari air yang hina (mani)?"',
+                explanation: 'QS. Al-Mursalat ayat 20 berbunyi: "Alam nakhluqkum mim maa\'im mahiin" (أَلَمْ نَخْلُقْكُمْ مِنْ مَاءٍ مَهِينٍ).'
+            },
+
+            // --- BAGIAN II: ISIAN SINGKAT INTERAKTIF (Soal 16 - 25) ---
+            {
+                id: 16,
+                stage: 2,
+                type: 'fill',
+                topic: 'Hukum Sukun',
+                question: 'Sukun yang terjadi karena adanya waqaf (pemberhentian bacaan) di akhir kata disebut sukun ....',
+                acceptedAnswers: ["'aridh", 'aridh', 'arid', "'arid", 'sukun aridh', "sukun 'aridh"],
+                choices: ["'Aridh", 'Ashli', 'Lazim', 'Wajib'],
+                hint: 'Sukun ini bersifat sementara (baru muncul ketika berhenti/waqaf).',
+                explanation: "Sukun yang terjadi karena waqaf di akhir bacaan disebut Sukun 'Aridh (سُكُون عَارِض)."
+            },
+            {
+                id: 17,
+                stage: 2,
+                type: 'fill',
+                topic: 'Hukum Sukun',
+                arabicDisplay: 'لَمْ يَلِدْ',
+                question: 'Pada kata di atas (Surah Al-Ikhlas ayat 3), tanda sukun pada huruf mim dan dal merupakan contoh sukun ....',
+                acceptedAnswers: ['ashli', 'asli', 'sukun ashli', 'sukun asli'],
+                choices: ['Ashli', "'Aridh", 'Jaiz', 'Iwadh'],
+                hint: 'Tanda sukunnya sudah tertulis jelas di mushaf sejak awal kata.',
+                explanation: 'Tanda sukun pada huruf mim (مْ) dan dal (دْ) pada lafal لَمْ يَلِدْ adalah Sukun Ashli karena memang sudah asli sukun dari asal katanya.'
+            },
+            {
+                id: 18,
+                stage: 2,
+                type: 'fill',
+                topic: 'Mad Lazim',
+                question: 'Secara bahasa, kata "Kalimi" pada istilah Mad Lazim Mutsaqqal Kalimi berarti ....',
+                acceptedAnswers: ['kata', 'kalimat', 'satu kata'],
+                choices: ['Kata', 'Huruf', 'Panjang', 'Berat'],
+                hint: 'Berasal dari bahasa Arab "Kalimah" (كَلِمَة).',
+                explanation: 'Kata "Kalimi" berasal dari kata "Kalimah" yang artinya kata.'
+            },
+            {
+                id: 19,
+                stage: 2,
+                type: 'fill',
+                topic: 'Mad Lazim',
+                question: 'Arti kata "Mukhaffaf" dalam hukum bacaan Mad Lazim adalah ....',
+                acceptedAnswers: ['diringankan', 'ringan'],
+                choices: ['Diringankan', 'Diberatkan', 'Dipanjangkan', 'Dileburkan'],
+                hint: 'Kebalikan dari Mutsaqqal (diberatkan).',
+                explanation: 'Mukhaffaf (مُخَفَّف) artinya diringankan, karena tidak ada tasydid atau idgham setelah huruf mad.'
+            },
+            {
+                id: 20,
+                stage: 2,
+                type: 'fill',
+                topic: 'Mad Lazim',
+                question: 'Mad Lazim Mutsaqqal Kalimi terjadi apabila Mad Thobi\'i bertemu dengan huruf yang bertanda baca ....',
+                acceptedAnswers: ['tasydid', 'bertasydid', 'syiddah'],
+                choices: ['Tasydid', 'Sukun', 'Tanwin', 'Dhammah'],
+                hint: 'Tanda baca yang berbentuk seperti kepala huruf sin kecil ( ّ ) yang membuat huruf dibaca ganda/berat.',
+                explanation: 'Mad Lazim Mutsaqqal Kalimi terjadi jika Mad Thobi\'i bertemu huruf bertasydid (syiddah) dalam satu kata.'
+            },
+            {
+                id: 21,
+                stage: 2,
+                type: 'fill',
+                topic: 'Mad Lazim Harfi',
+                arabicDisplay: 'نَقَصَ عَسَلُكُمْ',
+                question: 'Huruf-huruf Mad Lazim Harfi yang dibaca 6 harakat tergabung dalam kalimat di atas yang berjumlah ... huruf.',
+                acceptedAnswers: ['8', 'delapan'],
+                choices: ['8', '5', '6', '14'],
+                hint: 'Hitung jumlah huruf hijaiyah pada kalimat: ن - ق - ص - ع - س - ل - ك - م.',
+                explanation: 'Kalimat نَقَصَ عَسَلُكُمْ terdiri dari 8 huruf hijaiyah (Nun, Qaf, Shad, \'Ain, Sin, Lam, Kaf, Mim).'
+            },
+            {
+                id: 22,
+                stage: 2,
+                type: 'fill',
+                topic: 'Mad Lazim Harfi',
+                arabicDisplay: 'طسٓمٓ',
+                question: 'Pada huruf Muqaththa\'ah di atas, pertemuan huruf س (Siin) ke huruf م (Miim) dibaca melebur sehingga menjadi hukum Mad Lazim ....',
+                acceptedAnswers: ['mutsaqqal harfi', 'mad lazim mutsaqqal harfi'],
+                choices: ['Mutsaqqal Harfi', 'Mukhaffaf Harfi', 'Mutsaqqal Kalimi', 'Mukhaffaf Kalimi'],
+                hint: 'Dileburkan (berat = Mutsaqqal) dan terjadi pada huruf (Harfi).',
+                explanation: 'Huruf Siin (سِينْ) yang di-idgham-kan ke Miim (مِيمْ) menjadi Mad Lazim Mutsaqqal Harfi (dibaca Thaa-Siim-Miim).'
+            },
+            {
+                id: 23,
+                stage: 2,
+                type: 'fill',
+                topic: 'QS. Al-Mursalat',
+                question: 'Surah Al-Mursalat diturunkan di kota Makkah sebelum hijrah, sehingga tergolong surah ....',
+                acceptedAnswers: ['makkiyah', 'makiyah', 'makkiyyah'],
+                choices: ['Makkiyah', 'Madaniyah', 'Muqaththa\'ah', 'Mufashshal'],
+                hint: 'Surah yang turun sebelum Nabi hijrah ke Madinah dinamakan surah ...',
+                explanation: 'Surah yang diturunkan sebelum peristiwa hijrah Nabi Muhammad SAW disebut Surah Makkiyah.'
+            },
+            {
+                id: 24,
+                stage: 2,
+                type: 'fill',
+                topic: 'QS. Al-Mursalat',
+                question: 'Jumlah ayat dalam Surah Al-Mursalat secara keseluruhan adalah ... ayat.',
+                acceptedAnswers: ['50', 'lima puluh'],
+                choices: ['50', '40', '77', '30'],
+                hint: 'Angka puluhan yang bulat tepat di tengah-tengah antara 40 dan 60.',
+                explanation: 'Surah Al-Mursalat adalah surah ke-77 dan terdiri atas 50 ayat.'
+            },
+            {
+                id: 25,
+                stage: 2,
+                type: 'fill',
+                topic: 'QS. Al-Mursalat',
+                question: 'Lanjutan ayat Surah Al-Mursalat ayat 4 berikut: "Fal-faariqaati ...."',
+                acceptedAnswers: ['farqaa', 'farqa', 'farqan'],
+                choices: ['Farqaa', "'Urfaa", "'Ashfaa", 'Nasyraa'],
+                hint: 'Perhatikan akar kata "faariqaati" (فَالْفَارِقَاتِ).',
+                explanation: 'QS. Al-Mursalat ayat 4 berbunyi: "Fal-faariqaati farqaa" (فَالْفَارِقَاتِ فَرْقًا).'
+            },
+
+            // --- BAGIAN III: TANTANGAN URAIAN INTERAKTIF (Soal 26 - 30) ---
+            {
+                id: 26,
+                stage: 3,
+                type: 'match',
+                topic: 'Uraian: Sukun Ashli vs \'Aridh',
+                question: 'Pasangkan pernyataan dan contoh yang tepat antara Sukun Ashli dan Sukun \'Aridh!',
+                pairs: [
+                    { left: 'Sukun Ashli (Pengertian)', right: 'Sukun asli sejak asal kata, dibaca mati saat waqaf maupun washal' },
+                    { left: 'Sukun \'Aridh (Pengertian)', right: 'Sukun sementara yang muncul hanya karena berhenti (waqaf) di akhir kata' },
+                    { left: 'Contoh Sukun Ashli', right: 'لَمْ يَلِدْ (QS. Al-Ikhlas: 3)' },
+                    { left: 'Contoh Sukun \'Aridh', right: 'نَسْتَعِينُ (saat diwaqafkan menjadi Nasta\'iin)' }
+                ],
+                hint: 'Klik satu kartu di kolom kiri, lalu klik pasangan yang cocok di kolom kanan.',
+                explanation: 'Sukun Ashli bersifat tetap (contoh: لَمْ يَلِدْ), sedangkan Sukun \'Aridh bersifat sementara ketika waqaf (contoh: نَسْتَعِينُ).'
+            },
+            {
+                id: 27,
+                stage: 3,
+                type: 'match',
+                topic: 'Uraian: 4 Pembagian Mad Lazim',
+                question: 'Pasangkan 4 pembagian hukum bacaan Mad Lazim dengan contoh lafal atau hurufnya yang tepat!',
+                pairs: [
+                    { left: 'Mad Lazim Mutsaqqal Kalimi', right: 'وَلَا الضَّالِّينَ (Mad bertemu tasydid dalam 1 kata)' },
+                    { left: 'Mad Lazim Mukhaffaf Kalimi', right: 'آلْآنَ (Mad bertemu sukun dalam 1 kata)' },
+                    { left: 'Mad Lazim Mutsaqqal Harfi', right: 'Huruf ل pada الم (Huruf dilebur/idgham)' },
+                    { left: 'Mad Lazim Mukhaffaf Harfi', right: 'صٓ atau نٓ (Huruf dibaca 6 harakat tanpa lebur)' }
+                ],
+                hint: 'Ingat: Kalimi = Kata, Harfi = Huruf; Mutsaqqal = Berat/Tasydid/Idgham, Mukhaffaf = Ringan.',
+                explanation: 'Keempat jenis Mad Lazim memiliki contoh khas masing-masing dan semuanya dibaca panjang 6 harakat.'
+            },
+            {
+                id: 28,
+                stage: 3,
+                type: 'match',
+                topic: 'Uraian: Mutsaqqal vs Mukhaffaf Harfi',
+                question: 'Lengkapi perbandingan antara Mad Lazim Mutsaqqal Harfi dan Mad Lazim Mukhaffaf Harfi pada Fawatihus Suwar!',
+                pairs: [
+                    { left: 'Mad Lazim Mutsaqqal Harfi', right: 'Huruf pembuka surah (6 harakat) yang di-idgham-kan ke huruf berikutnya' },
+                    { left: 'Mad Lazim Mukhaffaf Harfi', right: 'Huruf pembuka surah (6 harakat) yang TIDAK di-idgham-kan' },
+                    { left: 'Contoh Mutsaqqal Harfi', right: 'ل pada الم dan س pada طسٓمٓ' },
+                    { left: 'Contoh Mukhaffaf Harfi', right: 'قٓ ، صٓ ، نٓ (dibaca tunggal tanpa melebur)' }
+                ],
+                hint: 'Fokus pada kata kunci "di-idgham-kan" (Mutsaqqal) dan "tidak di-idgham-kan" (Mukhaffaf).',
+                explanation: 'Perbedaan utamanya terletak pada proses peleburan (idgham): Mutsaqqal dileburkan ke huruf sesudahnya, sedangkan Mukhaffaf tidak dileburkan.'
+            },
+            {
+                id: 29,
+                stage: 3,
+                type: 'match',
+                topic: 'Uraian: Bacaan & Hukum Muqaththa\'ah',
+                question: 'Pasangkan huruf Muqaththa\'ah berikut dengan cara membaca (ejaan Latin) dan hukum Mad-nya yang tepat!',
+                pairs: [
+                    { left: 'الم (Al-Baqarah: 1)', right: 'Alif Laam Miim (Mutsaqqal Harfi & Mukhaffaf Harfi)' },
+                    { left: 'صٓ (Shad: 1)', right: 'Shaad (Mad Lazim Mukhaffaf Harfi - 6 harakat)' },
+                    { left: 'حمٓ (Ghafir: 1)', right: 'Haa Miim (Mad Thobi\'i Harfi 2 harakat & Mukhaffaf Harfi 6 harakat)' }
+                ],
+                hint: 'Alif tidak ada mad, Lam dilebur ke Mim, Shad berdiri sendiri 6 harakat, dan Ha pada Ha-Mim dibaca 2 harakat.',
+                explanation: 'الم dibaca Alif Laam Miim; صٓ dibaca Shaad (6 harakat); حمٓ dibaca Haa (2 harakat) Miim (6 harakat).'
+            },
+            {
+                id: 30,
+                stage: 3,
+                type: 'order',
+                topic: 'Uraian: QS. Al-Mursalat Ayat 1 - 3',
+                question: 'Susunlah teks Latin dari Surah Al-Mursalat ayat 1 sampai ayat 3 secara berurutan dari atas ke bawah!',
+                correctOrder: [
+                    "Ayat 1: Wal-mursalaati 'urfaa",
+                    "Ayat 2: Fal-'aashifaati 'ashfaa",
+                    "Ayat 3: Wan-naasyiraati nasyraa"
+                ],
+                hint: 'Urutannya: Malaikat yang diutus (\'urfaa) ➔ yang terbang kencang (\'ashfaa) ➔ yang menyebarkan rahmat (nasyraa).',
+                explanation: 'Urutan QS. Al-Mursalat ayat 1-3: (1) Wal-mursalaati \'urfaa, (2) Fal-\'aashifaati \'ashfaa, (3) Wan-naasyiraati nasyraa.'
+            }
+        ];
+
+        // =========================================================================
+        // 2. STATE & AUDIO ENGINE (Tone.js)
+        // =========================================================================
+        let state = {
+            playerName: 'Santri Hebat',
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            lives: 5,
+            combo: 0,
+            correctCount: 0,
+            wrongLog: [],
+            soundEnabled: true,
+            answered: false,
+            // State khusus soal Match & Order
+            selectedLeft: null,
+            matchedPairs: [],
+            orderSelection: []
+        };
+
+        // Fungsi Efek Suara Sintetis (Tone.js)
+        function playSound(type) {
+            if (!state.soundEnabled || typeof Tone === 'undefined') return;
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.volume.value = -8;
+                const now = Tone.now();
+
+                if (type === 'click') {
+                    synth.triggerAttackRelease('C5', '32n', now);
+                } else if (type === 'correct') {
+                    synth.triggerAttackRelease('C5', '16n', now);
+                    synth.triggerAttackRelease('E5', '16n', now + 0.08);
+                    synth.triggerAttackRelease('G5', '8n', now + 0.16);
+                } else if (type === 'wrong') {
+                    synth.triggerAttackRelease('E3', '16n', now);
+                    synth.triggerAttackRelease('C3', '8n', now + 0.12);
+                } else if (type === 'win') {
+                    synth.triggerAttackRelease('C5', '16n', now);
+                    synth.triggerAttackRelease('E5', '16n', now + 0.1);
+                    synth.triggerAttackRelease('G5', '16n', now + 0.2);
+                    synth.triggerAttackRelease('C6', '4n', now + 0.3);
+                }
+            } catch (e) {
+                // Abaikan error audio jika browser memblokir autoplay
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+            if (state.soundEnabled) playSound('click');
+        }
+
+        // =========================================================================
+        // 3. NAVIGASI & KONTROL ALUR GAME
+        // =========================================================================
+        function startGame() {
+            playSound('click');
+            const nameInput = document.getElementById('player-name').value.trim();
+            state.playerName = nameInput || 'Santri Hebat';
+
+            // Selalu gunakan seluruh 30 soal
+            state.questions = [...allQuestions];
+
+            // Reset statistik
+            state.currentIndex = 0;
+            state.score = 0;
+            state.lives = 5;
+            state.combo = 0;
+            state.correctCount = 0;
+            state.wrongLog = [];
+            state.answered = false;
+
+            // Update Tampilan UI
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('game-hud').classList.remove('hidden');
+            document.getElementById('home-btn').classList.remove('hidden');
+
+            updateHUD();
+            renderQuestion();
+        }
+
+        function confirmReturnHome() {
+            if (document.getElementById('screen-game').classList.contains('hidden')) {
+                goHome();
+                return;
+            }
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function goHome() {
+            closeModal();
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('game-hud').classList.add('hidden');
+            document.getElementById('home-btn').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
+        }
+
+        function updateHUD() {
+            // Update Hati
+            const maxHearts = 5;
+            let heartsStr = '';
+            for (let i = 0; i < maxHearts; i++) {
+                heartsStr += i < state.lives ? '❤️' : '🤍';
+            }
+            document.getElementById('hearts-display').textContent = heartsStr;
+
+            // Update Skor (Skala 0 - 100)
+            const totalQ = state.questions.length || 30;
+            const currentScore100 = Math.round((state.correctCount / totalQ) * 100);
+            state.score = currentScore100;
+            document.getElementById('score-display').textContent = currentScore100;
+
+            // Update Combo
+            const comboBadge = document.getElementById('combo-badge');
+            if (state.combo >= 2) {
+                comboBadge.classList.remove('hidden');
+                document.getElementById('combo-count').textContent = state.combo;
+            } else {
+                comboBadge.classList.add('hidden');
+            }
+        }
+
+        function showHint() {
+            playSound('click');
+            const q = state.questions[state.currentIndex];
+            document.getElementById('hint-text').textContent = q.hint;
+            document.getElementById('hint-box').classList.remove('hidden');
+        }
+
+        // =========================================================================
+        // 4. RENDER SOAL SESUAI TIPE (MCQ, FILL, MATCH, ORDER)
+        // =========================================================================
+        function renderQuestion() {
+            const q = state.questions[state.currentIndex];
+            const total = state.questions.length;
+            state.answered = false;
+
+            // Reset Feedback & Hint
+            document.getElementById('feedback-area').classList.add('hidden');
+            document.getElementById('hint-box').classList.add('hidden');
+
+            // Update Stage Badge & Progress
+            const stageNames = {
+                1: 'Babak 1: Pilihan Ganda',
+                2: 'Babak 2: Isian Singkat',
+                3: 'Babak 3: Tantangan Uraian'
+            };
+            const stageColors = {
+                1: 'bg-emerald-100 text-emerald-800',
+                2: 'bg-amber-100 text-amber-800',
+                3: 'bg-purple-100 text-purple-800'
+            };
+
+            const stageBadge = document.getElementById('stage-badge');
+            stageBadge.textContent = stageNames[q.stage];
+            stageBadge.className = `font-game font-bold text-xs sm:text-sm px-3 py-1 rounded-xl ${stageColors[q.stage]}`;
+
+            document.getElementById('question-counter').textContent = `Soal ${state.currentIndex + 1} dari ${total}`;
+            document.getElementById('progress-bar').style.width = `${((state.currentIndex + 1) / total) * 100}%`;
+            document.getElementById('topic-tag').textContent = `📚 ${q.topic}`;
+
+            // Render Pertanyaan & Lafal Arab (jika ada)
+            const qContent = document.getElementById('question-content');
+            let html = '';
+            if (q.arabicDisplay) {
+                html += `
+                    <div class="my-4 p-4 sm:p-5 bg-emerald-50/80 border-2 border-emerald-200 rounded-2xl text-center">
+                        <span class="font-arab text-3xl sm:text-5xl font-bold text-emerald-900 tracking-wide">${q.arabicDisplay}</span>
+                    </div>
+                `;
+            }
+            html += `<h3 class="text-base sm:text-xl font-bold text-slate-800 leading-relaxed">${state.currentIndex + 1}. ${q.question}</h3>`;
+            qContent.innerHTML = html;
+
+            // Render Area Jawaban Berdasarkan Tipe
+            const answerArea = document.getElementById('answer-area');
+            answerArea.innerHTML = '';
+
+            if (q.type === 'mcq') {
+                renderMCQ(q, answerArea);
+            } else if (q.type === 'fill') {
+                renderFill(q, answerArea);
+            } else if (q.type === 'match') {
+                renderMatch(q, answerArea);
+            } else if (q.type === 'order') {
+                renderOrder(q, answerArea);
+            }
+        }
+
+        // --- TIPE A: PILIHAN GANDA ---
+        function renderMCQ(q, container) {
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3.5';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.id = `opt-${opt.key}`;
+                btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex items-center gap-3.5 group bg-white shadow-sm';
+                btn.onclick = () => checkMCQ(opt.key);
+
+                const textClass = opt.isArabic
+                    ? 'font-arab text-2xl sm:text-3xl font-bold text-slate-800 flex-grow text-right pr-2'
+                    : 'font-semibold text-sm sm:text-base text-slate-700 flex-grow';
+
+                btn.innerHTML = `
+                    <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-emerald-500 group-hover:text-white font-game font-bold text-slate-700 flex items-center justify-center shrink-0 transition">
+                        ${opt.key}
+                    </span>
+                    <span class="${textClass}">${opt.text}</span>
+                `;
+                grid.appendChild(btn);
+            });
+            container.appendChild(grid);
+        }
+
+        function checkMCQ(selectedKey) {
+            if (state.answered) return;
+            state.answered = true;
+
+            const q = state.questions[state.currentIndex];
+            const isCorrect = selectedKey === q.correct;
+
+            q.options.forEach(opt => {
+                const btn = document.getElementById(`opt-${opt.key}`);
+                btn.disabled = true;
+                if (opt.key === q.correct) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-100', 'ring-2', 'ring-emerald-300');
+                } else if (opt.key === selectedKey && !isCorrect) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-rose-500', 'bg-rose-100', 'animate-shake');
+                }
+            });
+
+            handleResult(isCorrect, q);
+        }
+
+        // --- TIPE B: ISIAN SINGKAT + CHIP BANTUAN ---
+        function renderFill(q, container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'space-y-4';
+
+            wrapper.innerHTML = `
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="fill-input" placeholder="Ketik jawaban singkat di sini..."
+                        class="flex-grow px-4 py-3.5 rounded-2xl border-2 border-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none font-bold text-slate-800 text-base sm:text-lg"
+                        onkeypress="if(event.key === 'Enter') checkFill()">
+                    <button id="fill-submit" onclick="checkFill()" class="btn-3d btn-emerald text-white font-game font-bold px-6 py-3.5 rounded-2xl text-base shrink-0">
+                        Periksa Jawaban ✓
+                    </button>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Atau pilih kata kunci cepat:</p>
+                    <div id="fill-chips" class="flex flex-wrap gap-2"></div>
+                </div>
+            `;
+            container.appendChild(wrapper);
+
+            const chipsContainer = document.getElementById('fill-chips');
+            const shuffledChoices = [...q.choices].sort(() => Math.random() - 0.5);
+            shuffledChoices.forEach(choice => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold text-sm transition';
+                chip.textContent = choice;
+                chip.onclick = () => {
+                    if (state.answered) return;
+                    playSound('click');
+                    document.getElementById('fill-input').value = choice;
+                };
+                chipsContainer.appendChild(chip);
+            });
+        }
+
+        function checkFill() {
+            if (state.answered) return;
+            const inputEl = document.getElementById('fill-input');
+            const rawVal = inputEl.value.trim().toLowerCase();
+            if (!rawVal) {
+                inputEl.classList.add('border-amber-400', 'animate-shake');
+                setTimeout(() => inputEl.classList.remove('animate-shake'), 400);
+                return;
+            }
+
+            state.answered = true;
+            inputEl.disabled = true;
+            document.getElementById('fill-submit').disabled = true;
+
+            const q = state.questions[state.currentIndex];
+            const cleanUser = rawVal.replace(/['’`]/g, '');
+            const isCorrect = q.acceptedAnswers.some(ans => ans.toLowerCase().replace(/['’`]/g, '') === cleanUser);
+
+            if (isCorrect) {
+                inputEl.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+            } else {
+                inputEl.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-900', 'animate-shake');
+            }
+
+            handleResult(isCorrect, q);
+        }
+
+        // --- TIPE C: MENJODOHKAN (URAIAN INTERAKTIF) ---
+        function renderMatch(q, container) {
+            state.selectedLeft = null;
+            state.matchedPairs = [];
+
+            const info = document.createElement('p');
+            info.className = 'text-xs sm:text-sm text-purple-700 bg-purple-50 px-3.5 py-2 rounded-xl border border-purple-200 mb-4 font-medium';
+            info.innerHTML = '💡 <strong>Cara Bermain:</strong> Klik satu kartu di <strong>Kolom Kiri</strong>, lalu klik pasangannya yang sesuai di <strong>Kolom Kanan</strong>.';
+            container.appendChild(info);
+
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+
+            const leftCol = document.createElement('div');
+            leftCol.className = 'space-y-2.5';
+            leftCol.id = 'match-left-col';
+
+            const rightCol = document.createElement('div');
+            rightCol.className = 'space-y-2.5';
+            rightCol.id = 'match-right-col';
+
+            q.pairs.forEach((pair, idx) => {
+                const btnLeft = document.createElement('button');
+                btnLeft.id = `match-l-${idx}`;
+                btnLeft.className = 'w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-purple-400 font-bold text-xs sm:text-sm text-slate-800 transition shadow-sm';
+                btnLeft.textContent = pair.left;
+                btnLeft.onclick = () => selectMatchLeft(idx);
+                leftCol.appendChild(btnLeft);
+            });
+
+            const shuffledRight = q.pairs.map((p, idx) => ({ text: p.right, origIdx: idx })).sort(() => Math.random() - 0.5);
+            shuffledRight.forEach((item, displayIdx) => {
+                const btnRight = document.createElement('button');
+                btnRight.id = `match-r-${item.origIdx}`;
+                btnRight.className = 'w-full text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-purple-400 font-medium text-xs sm:text-sm text-slate-700 transition shadow-sm';
+                btnRight.textContent = item.text;
+                btnRight.onclick = () => selectMatchRight(item.origIdx);
+                rightCol.appendChild(btnRight);
+            });
+
+            grid.appendChild(leftCol);
+            grid.appendChild(rightCol);
+            container.appendChild(grid);
+        }
+
+        function selectMatchLeft(idx) {
+            if (state.answered || state.matchedPairs.includes(idx)) return;
+            playSound('click');
+
+            const q = state.questions[state.currentIndex];
+            q.pairs.forEach((_, i) => {
+                if (!state.matchedPairs.includes(i)) {
+                    const el = document.getElementById(`match-l-${i}`);
+                    el.classList.remove('border-purple-600', 'bg-purple-100', 'ring-2', 'ring-purple-300');
+                }
+            });
+
+            state.selectedLeft = idx;
+            const activeEl = document.getElementById(`match-l-${idx}`);
+            activeEl.classList.add('border-purple-600', 'bg-purple-100', 'ring-2', 'ring-purple-300');
+        }
+
+        function selectMatchRight(origIdx) {
+            if (state.answered || state.selectedLeft === null || state.matchedPairs.includes(origIdx)) return;
+
+            const leftEl = document.getElementById(`match-l-${state.selectedLeft}`);
+            const rightEl = document.getElementById(`match-r-${origIdx}`);
+
+            if (state.selectedLeft === origIdx) {
+                playSound('correct');
+                state.matchedPairs.push(origIdx);
+                leftEl.className = 'w-full text-left p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-100 font-bold text-xs sm:text-sm text-emerald-900 opacity-85 cursor-default';
+                rightEl.className = 'w-full text-left p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-100 font-semibold text-xs sm:text-sm text-emerald-900 opacity-85 cursor-default';
+                state.selectedLeft = null;
+
+                const q = state.questions[state.currentIndex];
+                if (state.matchedPairs.length === q.pairs.length) {
+                    state.answered = true;
+                    handleResult(true, q);
+                }
+            } else {
+                playSound('wrong');
+                rightEl.classList.add('border-rose-500', 'bg-rose-100', 'animate-shake');
+                setTimeout(() => {
+                    rightEl.classList.remove('border-rose-500', 'bg-rose-100', 'animate-shake');
+                }, 450);
+            }
+        }
+
+        // --- TIPE D: MENGURUTKAN AYAT (SOAL 30) ---
+        function renderOrder(q, container) {
+            state.orderSelection = [];
+            const shuffled = [...q.correctOrder].sort(() => Math.random() - 0.5);
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 min-h-[140px]" id="order-slots">
+                        <p class="text-xs text-slate-400 text-center my-8" id="order-placeholder">Klik potongan ayat di bawah secara berurutan (Ayat 1 ➔ Ayat 2 ➔ Ayat 3)</p>
+                    </div>
+                    <div class="flex flex-col gap-2.5" id="order-pool"></div>
+                    <div class="flex justify-between items-center pt-2">
+                        <button type="button" onclick="resetOrder()" id="order-reset-btn" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs sm:text-sm transition">
+                            🔄 Ulangi Susunan
+                        </button>
+                        <button type="button" onclick="checkOrder()" id="order-submit-btn" class="btn-3d btn-emerald text-white font-game font-bold px-6 py-3 rounded-2xl text-sm sm:text-base">
+                            Periksa Urutan ✓
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const pool = document.getElementById('order-pool');
+            shuffled.forEach((line, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `pool-item-${idx}`;
+                btn.className = 'w-full text-left p-3.5 rounded-2xl border-2 border-emerald-200 bg-white hover:bg-emerald-50 font-bold text-sm sm:text-base text-slate-800 transition shadow-sm';
+                btn.textContent = line;
+                btn.onclick = () => pickOrderItem(line, btn);
+                pool.appendChild(btn);
+            });
+        }
+
+        function pickOrderItem(text, btnEl) {
+            if (state.answered || btnEl.disabled) return;
+            playSound('click');
+
+            btnEl.disabled = true;
+            btnEl.classList.add('opacity-40', 'cursor-not-allowed');
+            state.orderSelection.push(text);
+
+            const slots = document.getElementById('order-slots');
+            const placeholder = document.getElementById('order-placeholder');
+            if (placeholder) placeholder.remove();
+
+            const badge = document.createElement('div');
+            badge.className = 'p-3 mb-2 rounded-xl bg-emerald-100 border border-emerald-300 font-bold text-emerald-900 text-sm sm:text-base flex items-center gap-2.5 animate-pop';
+            badge.innerHTML = `<span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs flex items-center justify-center">${state.orderSelection.length}</span> <span>${text}</span>`;
+            slots.appendChild(badge);
+        }
+
+        function resetOrder() {
+            if (state.answered) return;
+            playSound('click');
+            const q = state.questions[state.currentIndex];
+            renderOrder(q, document.getElementById('answer-area'));
+        }
+
+        function checkOrder() {
+            if (state.answered) return;
+            const q = state.questions[state.currentIndex];
+            if (state.orderSelection.length < q.correctOrder.length) {
+                const slots = document.getElementById('order-slots');
+                slots.classList.add('border-amber-400', 'animate-shake');
+                setTimeout(() => slots.classList.remove('animate-shake'), 400);
+                return;
+            }
+
+            state.answered = true;
+            document.getElementById('order-reset-btn').disabled = true;
+            document.getElementById('order-submit-btn').disabled = true;
+
+            const isCorrect = state.orderSelection.every((val, idx) => val === q.correctOrder[idx]);
+            handleResult(isCorrect, q);
+        }
+
+        // =========================================================================
+        // 5. EVALUASI JAWABAN & PERPINDAHAN SOAL
+        // =========================================================================
+        function handleResult(isCorrect, q) {
+            const feedbackArea = document.getElementById('feedback-area');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+            const nextBtn = document.getElementById('next-btn');
+
+            feedbackArea.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-400', 'text-emerald-900', 'bg-rose-50', 'border-rose-400', 'text-rose-900');
+
+            if (isCorrect) {
+                playSound('correct');
+                state.combo++;
+                state.correctCount++;
+                const updatedScore = Math.round((state.correctCount / state.questions.length) * 100);
+
+                feedbackArea.classList.add('bg-emerald-50', 'border-emerald-400', 'text-emerald-900');
+                feedbackIcon.textContent = state.combo >= 3 ? '🔥' : '🌟';
+                feedbackTitle.textContent = state.combo >= 3
+                    ? `Hebat! Kombo ${state.combo}x (Nilai Sementara: ${updatedScore}/100)`
+                    : `Masya Allah, Jawabanmu Tepat! (Nilai Sementara: ${updatedScore}/100)`;
+                feedbackExp.innerHTML = `<strong>Pembahasan:</strong> ${q.explanation}`;
+            } else {
+                playSound('wrong');
+                state.combo = 0;
+                if (state.lives > 1) {
+                    state.lives--;
+                } else {
+                    state.lives = 1;
+                }
+                state.wrongLog.push({
+                    num: state.currentIndex + 1,
+                    question: q.question,
+                    explanation: q.explanation
+                });
+
+                feedbackArea.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900');
+                feedbackIcon.textContent = '💡';
+                feedbackTitle.textContent = 'Kurang Tepat, Yuk Pelajari Pembahasannya!';
+                feedbackExp.innerHTML = `<strong>Kunci & Penjelasan:</strong> ${q.explanation}`;
+            }
+
+            if (state.currentIndex === state.questions.length - 1) {
+                nextBtn.innerHTML = 'Lihat Nilai Akhir 🏆';
+            } else {
+                nextBtn.innerHTML = 'Lanjut Soal Berikutnya <span>➔</span>';
+            }
+
+            updateHUD();
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            if (state.currentIndex < state.questions.length - 1) {
+                state.currentIndex++;
+                renderQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('game-hud').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const totalQ = state.questions.length;
+            const finalScore = Math.round((state.correctCount / totalQ) * 100);
+            state.score = finalScore;
+
+            document.getElementById('result-player-name').textContent = state.playerName;
+            document.getElementById('result-score').textContent = `${finalScore} / 100`;
+            document.getElementById('result-correct').textContent = `${state.correctCount}/${totalQ}`;
+
+            let grade = 'Mumtaz (Istimewa)';
+            let trophy = '🏆';
+            let heading = 'Alhamdulillah, Luar Biasa!';
+            let subtext = 'Pemahamanmu tentang Hukum Tajwid dan Surah Al-Mursalat sangat mengagumkan!';
+
+            if (finalScore >= 85) {
+                grade = 'Mumtaz (A+)';
+                trophy = '🏆';
+                playSound('win');
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+            } else if (finalScore >= 65) {
+                grade = 'Jayyid Jiddan (B+)';
+                trophy = '🥈';
+                heading = 'Bagus Sekali, Terus Tingkatkan!';
+                subtext = 'Kamu sudah menguasai sebagian besar materi BTAQ Kelas 6.';
+                playSound('win');
+            } else {
+                grade = 'Perlu Muroja\'ah';
+                trophy = '📖';
+                heading = 'Tetap Semangat Belajar!';
+                subtext = 'Jangan menyerah! Baca kembali catatan evaluasi di bawah lalu coba lagi ya.';
+            }
+
+            document.getElementById('result-trophy').textContent = trophy;
+            document.getElementById('result-heading').textContent = heading;
+            document.getElementById('result-subtext').textContent = subtext;
+            document.getElementById('result-grade').textContent = grade;
+
+            // Tampilkan daftar soal yang perlu dipelajari lagi jika ada yang salah
+            const reviewSection = document.getElementById('review-section');
+            const reviewList = document.getElementById('review-list');
+            if (state.wrongLog.length > 0) {
+                reviewSection.classList.remove('hidden');
+                reviewList.innerHTML = state.wrongLog.map(item => `
+                    <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs sm:text-sm">
+                        <p class="font-bold text-rose-900">Soal #${item.num}: ${item.question}</p>
+                        <p class="text-slate-700 mt-1">✅ ${item.explanation}</p>
+                    </div>
+                `).join('');
+            } else {
+                reviewSection.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
